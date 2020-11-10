@@ -1,0 +1,11 @@
+{
+  "output":"source",
+  "debug":true,
+  "optimize": "speed",
+  "allowedStartRules": [
+    "Message",
+    "Uri",
+    "Contact",
+    "Sdp"
+  ]
+}

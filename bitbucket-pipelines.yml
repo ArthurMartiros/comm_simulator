@@ -1,0 +1,74 @@
+image:
+  name: gcr.io/ffn-cicd-prod-01/pipeline-nodejs:1.2
+  username: $PIPELINE_USERNAME
+  password: $PIPELINE_PASSWORD
+
+definitions:
+  services:
+    docker:
+      memory: 2048
+  steps:
+  - step: &validate
+      name: Validate
+      script:
+      - helm_validate.sh
+  - step: &build
+      name: Build
+      script:
+      - npm i -g yarn
+      - yarn --cwd packages/client install --ignore-engines --unsafe-perm
+      - yarn --cwd packages/server install --ignore-engines --unsafe-perm
+      services:
+      - docker
+  - step: &bake
+      name: Bake
+      script:
+      - image_bake.sh . --build-arg ARTIFACTORY_URL=${ARTIFACTORY_URL} --build-arg ARTIFACTORY_USERNAME=${ARTIFACTORY_USERNAME} --build-arg ARTIFACTORY_PASSWORD=${ARTIFACTORY_PASSWORD}
+      services:
+      - docker
+  - step: &helm_release
+      name: Helm Release
+      script:
+      - helm_release.sh
+      services:
+      - docker
+  - step: &deploy_dev
+      name: Deploy to develop
+      deployment: test
+      services:
+      - docker
+      script:
+      - helm_deploy.sh development
+  - step: &deploy_stg
+      name: Deploy to staging
+      deployment: staging
+      trigger: manual
+      services:
+      - docker
+      script:
+      - helm_deploy.sh staging
+
+pipelines:
+  default:
+  - step: *validate
+  - step: *build
+  pull-requests:
+    '**':
+    - step: *validate
+    - step: *build
+    - step: *bake
+  branches:
+    master:
+    - step: *validate
+    - step: *build
+    - step: *bake
+    - step: *helm_release
+    - step: *deploy_dev
+    - step: *deploy_stg
+    hotfix:
+    - step: *validate
+    - step: *build
+    - step: *bake
+    - step: *helm_release
+    - step: *deploy_dev
+    - step: *deploy_stg

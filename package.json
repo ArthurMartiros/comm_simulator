@@ -1,0 +1,17 @@
+{
+  "name": "communicator-simulator",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build-client": "yarn --cwd ./packages/client run build",
+    "build-server": "yarn --cwd ./packages/server run build",
+    "build": "yarn run build-client && yarn run build-server",
+    "test-server" :"yarn --cwd ./packages/server run test",
+    "test-client" :"yarn --cwd ./packages/client run test",
+    "test": "yarn run test-client && yarn run test-server",
+    "watch-client": "yarn --cwd ./packages/client run start",
+    "watch-server": "yarn --cwd ./packages/server run watch",
+    "start-server": "yarn --cwd ./packages/server run start",
+    "serve": "yarn --cwd ./packages/server run serve"
+  }
+}
